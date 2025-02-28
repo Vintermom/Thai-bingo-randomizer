@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>สุ่มตัวอักษร Bingo ก-ฮ พร้อมเสียง</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            background-color: #FFFFFF;
+            color: #333333;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 50px;
+            color: #005A9C;
+        }
+        .card-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: vh;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+margin-right: 150px;
+            position: relative;
+        }
+        .card {
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 200px;
+            height: 250px;
+            background-color: #FFD700;
+            border-radius: 10px;
+            margin: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            color: #333333;
+            position: absolute;
+            transition: transform 0.2s ease-in-out, left 0.2s ease-in-out;
+        }
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 90, 156, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .popup-content {
+            background-color: #FFFFFF;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 300px;
+            position: relative;
+            color: #333333;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #005A9C;
+        }
+        button {
+            font-size: 28px;
+            padding: 10px 25px;
+            margin: 20px;
+            background-color: #005A9C;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>สุ่มตัวอักษร Bingo ก-ฮ</h1>
+    <button onclick="randomLetter()">สุ่มการ์ด</button>
+    <button onclick="toggleSound()" id="soundToggle"><span id='soundIcon'>🔊</span> ปิดเสียง</button>
+    <div class="card-container" id="cardContainer"></div>
+    <audio id="randomSound" src="https://www.fesliyanstudios.com/play-mp3/4382"></audio>
+
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=SfuwMk3l"></script>
+    <script>
+        const letters = ['ก', 'ข', 'ฃ', 'ค', 'ฆ', 'ง', 'จ', 'ฉ', 'ช', 'ซ', 'ฌ', 'ญ', 'ฎ', 'ฏ', 'ฐ', 'ฑ', 'ฒ', 'ณ', 'ด', 'ต', 'ถ', 'ท', 'ธ', 'น', 'บ', 'ป', 'ผ', 'ฝ', 'พ', 'ฟ', 'ภ', 'ม', 'ย', 'ร', 'ล', 'ว', 'ศ', 'ษ', 'ส', 'ห', 'ฬ', 'อ', 'ฮ'];
+        let soundEnabled = true;
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundToggleButton = document.getElementById("soundToggle");
+            const soundIcon = document.getElementById("soundIcon");
+            if (soundEnabled) {
+                soundToggleButton.innerHTML = "<span id='soundIcon'>🔊</span> ปิดเสียง";
+            } else {
+                soundToggleButton.innerHTML = "<span id='soundIcon'>🔈</span> เปิดเสียง";
+            }
+        }
+
+        function createCards() {
+            const container = document.getElementById('cardContainer');
+            letters.forEach((letter, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerText = letter;
+                card.style.left = `${Math.random() * 80 + 10}%`;
+                card.style.top = `${Math.random() * 60 + 20}%`;
+                container.appendChild(card);
+            });
+        }
+
+        function randomLetter() {
+            const cards = document.querySelectorAll('.card');
+            const sound = document.getElementById("randomSound");
+            if (soundEnabled) sound.play();
+            let spinTime = 2000;
+            let interval = setInterval(() => {
+                cards.forEach(card => {
+                    card.style.left = `${Math.random() * 80 + 10}%`;
+                    card.style.top = `${Math.random() * 60 + 20}%`;
+                });
+            }, 100);
+            
+            setTimeout(() => {
+                clearInterval(interval);
+                const index = Math.floor(Math.random() * letters.length);
+                const selectedLetter = letters.splice(index, 1)[0];
+                showPopup(selectedLetter);
+            }, spinTime);
+        }
+
+        function showPopup(letter) {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `<div class='popup-content'><span class='close-btn' onclick='this.parentElement.parentElement.remove()'>&times;</span>${letter}</div>`;
+            document.body.appendChild(popup);
+            if (soundEnabled) {
+                responsiveVoice.speak(letter, "Thai Female");
+            }
+        }
+        
+        createCards();
+    </script>
+</body>
+</html>
