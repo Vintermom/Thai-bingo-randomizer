@@ -1,153 +1,295 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <title>สุ่มตัวอักษร Bingo ก-ฮ พร้อมเสียง</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: 'Arial', sans-serif;
-            background-color: #FFFFFF;
-            color: #333333;
-            overflow: hidden;
-        }
-        h1 {
-            font-size: 50px;
-            color: #005A9C;
-        }
-        .card-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: vh;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
-margin-right: 150px;
-            position: relative;
-        }
-        .card {
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
-            width: 200px;
-            height: 250px;
-            background-color: #FFD700;
-            border-radius: 10px;
-            margin: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 70px;
-            color: #333333;
-            position: absolute;
-            transition: transform 0.2s ease-in-out, left 0.2s ease-in-out;
-        }
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 90, 156, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-        .popup-content {
-            background-color: #FFFFFF;
-            padding: 20px;
-            border-radius: 10px;
-            font-size: 300px;
-            position: relative;
-            color: #333333;
-        }
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 30px;
-            cursor: pointer;
-            color: #005A9C;
-        }
-        button {
-            font-size: 28px;
-            padding: 10px 25px;
-            margin: 20px;
-            background-color: #005A9C;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            color: #FFFFFF;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เกมส์บิงโกภาษาไทย</title>
+  <!-- API เสียงอ่าน -->
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=SfuwMk3l"></script>
+  <style>
+    /* Reset และพื้นฐาน */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #f1f4f9; 
+      color: #333; 
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #003399;
+    }
+    .container {
+      display: flex; 
+      flex-direction: column;
+      justify-content: center; 
+      align-items: center;
+      min-height: 70vh;
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    /* การ์ดสำหรับสุ่มตัวอักษร */
+    .card {
+      width: 150px;
+      height: 200px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 20px auto;
+      font-size: 3em;
+      transition: transform 0.5s;
+    }
+    /* เอฟเฟคการสับการ์ด (flip animation) */
+    .card.shuffling {
+      animation: shuffle 2s linear;
+    }
+    @keyframes shuffle {
+      0% { transform: rotateY(0deg); }
+      25% { transform: rotateY(90deg); }
+      50% { transform: rotateY(180deg); }
+      75% { transform: rotateY(270deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    /* Controls ที่หน้าหลัก */
+    #controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    /* สไตล์ปุ่มสำหรับสุ่มการ์ด และปุ่มปิดเสียง (ให้ขนาดเท่ากัน) */
+    .btn, .mute-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 10px 5px;
+      padding: 10px 16px;
+      font-size: 1em;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s, transform 0.2s;
+      min-width: 140px;
+    }
+    .btn {
+      background: #003399;
+      color: #fff;
+      border: 2px solid #003399;
+    }
+    .mute-btn {
+      background: #003399;
+      color: #fff;
+      border: 2px solid #003399;
+    }
+    .btn:hover, .mute-btn:hover {
+      background: #2980b9;
+      transform: scale(1.05);
+    }
+    .btn:active, .mute-btn:active {
+      transform: scale(0.98);
+    }
+    /* Popup แบบเต็มจอ */
+    #popup {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #popup .popup-content {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    /* ซ่อนคำอ่านใน Popup */
+    #result-reading { display: none; }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .card {
+        width: 120px;
+        height: 160px;
+        font-size: 2.5em;
+      }
+      .btn, .mute-btn {
+        font-size: 0.9em;
+        padding: 8px 16px;
+        min-width: 120px;
+      }
+      h1 {
+        font-size: 2em;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>สุ่มตัวอักษร Bingo ก-ฮ</h1>
-    <button onclick="randomLetter()">สุ่มการ์ด</button>
-    <button onclick="toggleSound()" id="soundToggle"><span id='soundIcon'>🔊</span> ปิดเสียง</button>
-    <div class="card-container" id="cardContainer"></div>
-    <audio id="randomSound" src="https://www.fesliyanstudios.com/play-mp3/4382"></audio>
+  <h1>เกมส์บิงโกภาษาไทย</h1>
+  <div class="container">
+    <!-- ส่วนแสดงการ์ดสำหรับสุ่ม -->
+    <div id="game-area">
+      <!-- เปลี่ยนจาก "?" เป็น Emoji ยิ้ม -->
+      <div id="card" class="card">😊</div>
+    </div>
+    
+    <!-- Controls ที่หน้าหลัก -->
+    <div id="controls">
+      <button id="manual-btn" class="btn">สุ่มการ์ด</button>
+      <button id="mute-btn" class="mute-btn">ปิดเสียง <span id="mute-icon">🔊</span></button>
+    </div>
+  </div>
 
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=SfuwMk3l"></script>
-    <script>
-        const letters = ['ก', 'ข', 'ฃ', 'ค', 'ฆ', 'ง', 'จ', 'ฉ', 'ช', 'ซ', 'ฌ', 'ญ', 'ฎ', 'ฏ', 'ฐ', 'ฑ', 'ฒ', 'ณ', 'ด', 'ต', 'ถ', 'ท', 'ธ', 'น', 'บ', 'ป', 'ผ', 'ฝ', 'พ', 'ฟ', 'ภ', 'ม', 'ย', 'ร', 'ล', 'ว', 'ศ', 'ษ', 'ส', 'ห', 'ฬ', 'อ', 'ฮ'];
-        let soundEnabled = true;
+  <!-- Popup แบบเต็มจอสำหรับแสดงผลลัพธ์ -->
+  <div id="popup">
+    <div class="popup-content">
+      <div id="result-letter" style="font-size:4em; margin-bottom:10px;">?</div>
+      <!-- คำอ่านซ่อนไว้ (ใช้สำหรับการอ่านเสียง) -->
+      <div id="result-reading">?</div>
+      <button id="close-btn" class="btn">ปิด</button>
+    </div>
+  </div>
 
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const soundToggleButton = document.getElementById("soundToggle");
-            const soundIcon = document.getElementById("soundIcon");
-            if (soundEnabled) {
-                soundToggleButton.innerHTML = "<span id='soundIcon'>🔊</span> ปิดเสียง";
-            } else {
-                soundToggleButton.innerHTML = "<span id='soundIcon'>🔈</span> เปิดเสียง";
-            }
+  <!-- Audio สำหรับเสียงเอฟเฟคการสับการ์ด -->
+  <audio id="shuffle-sound" src="shuffle.mp3" preload="auto"></audio>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // รายการการ์ด (ตัวอักษรไทย ก-ฮ) พร้อมคำอ่าน
+      let cardsDeck = [
+        { letter: "ก", reading: "กอไก่" },
+        { letter: "ข", reading: "ขอไข่" },
+        { letter: "ฃ", reading: "ขอขวด" },
+        { letter: "ค", reading: "คอควาย" },
+        { letter: "ฅ", reading: "คอคน" },
+        { letter: "ฆ", reading: "ฆอระฆัง" },
+        { letter: "ง", reading: "งองู" },
+        { letter: "จ", reading: "จอจาน" },
+        { letter: "ฉ", reading: "ฉอฉิ่ง" },
+        { letter: "ช", reading: "ชอช้าง" },
+        { letter: "ซ", reading: "ซอโซ่" },
+        { letter: "ฌ", reading: "ฌอเฌอ" },
+        { letter: "ญ", reading: "ญอหญิง" },
+        { letter: "ฎ", reading: "ดอชะดา" },
+        { letter: "ฏ", reading: "ตอปะตัก" },
+        { letter: "ฐ", reading: "ทอผู้เฒ่า" },
+        { letter: "ฑ", reading: "ฑอ มน โท" },
+        { letter: "ฒ", reading: "ทอผูเฒ่า" },
+        { letter: "ณ", reading: "ณอเณร" },
+        { letter: "ด", reading: "ดอเด็ก" },
+        { letter: "ต", reading: "ตอเต่า" },
+        { letter: "ถ", reading: "ถอถุง" },
+        { letter: "ท", reading: "ทอทหาร" },
+        { letter: "ธ", reading: "ทอธง" },
+        { letter: "น", reading: "นอหนู" },
+        { letter: "บ", reading: "บอใบไม้" },
+        { letter: "ป", reading: "ปอปลา" },
+        { letter: "ผ", reading: "ผอผึ้ง" },
+        { letter: "ฝ", reading: "ฝอฝา" },
+        { letter: "พ", reading: "พอพาน" },
+        { letter: "ฟ", reading: "ฟอฟัน" },
+        { letter: "ภ", reading: "ภอสำเภา" },
+        { letter: "ม", reading: "มอม้า" },
+        { letter: "ย", reading: "ยอยักษ์" },
+        { letter: "ร", reading: "รอเรือ" },
+        { letter: "ล", reading: "ลอ ลิง" },
+        { letter: "ว", reading: "วอแหวน" },
+        { letter: "ศ", reading: "ศอศาลา" },
+        { letter: "ษ", reading: "ษอฤาษี" },
+        { letter: "ส", reading: "สอเสือ" },
+        { letter: "ห", reading: "หอหีบ" },
+        { letter: "ฬ", reading: "ฬอจุฬา" },
+        { letter: "อ", reading: "อออ่าง" },
+        { letter: "ฮ", reading: "ฮอ นก ฮูก" }
+      ];
+
+      let isMuted = false; // สถานะเสียง (เริ่มต้นเปิด)
+      const cardEl = document.getElementById('card');
+      const popupEl = document.getElementById('popup');
+      const resultLetterEl = document.getElementById('result-letter');
+      const resultReadingEl = document.getElementById('result-reading');
+      const shuffleSound = document.getElementById('shuffle-sound');
+      const muteBtn = document.getElementById('mute-btn');
+
+      // ฟังก์ชันสำหรับเล่นเสียงเอฟเฟค (ถ้าเสียงไม่ถูกปิด)
+      function playSound() {
+        if (!isMuted && shuffleSound) {
+          shuffleSound.currentTime = 0;
+          shuffleSound.play().catch(e => console.log("ไม่สามารถเล่นเสียงได้:", e));
         }
+      }
 
-        function createCards() {
-            const container = document.getElementById('cardContainer');
-            letters.forEach((letter, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerText = letter;
-                card.style.left = `${Math.random() * 80 + 10}%`;
-                card.style.top = `${Math.random() * 60 + 20}%`;
-                container.appendChild(card);
-            });
+      // ฟังก์ชันเริ่มสุ่มการ์ด (แสดงเอฟเฟคสับการ์ด 2 วินาที)
+      function startRandomization() {
+        if (cardsDeck.length === 0) {
+          alert("การ์ดหมดแล้ว");
+          return;
         }
+        cardEl.classList.add('shuffling');
+        playSound();
+        setTimeout(() => {
+          cardEl.classList.remove('shuffling');
+          const randomIndex = Math.floor(Math.random() * cardsDeck.length);
+          const randomCard = cardsDeck[randomIndex];
+          // ลบการ์ดที่สุ่มแล้วออกจาก deck
+          cardsDeck.splice(randomIndex, 1);
+          // กำหนดค่าลงใน Popup
+          resultLetterEl.textContent = randomCard.letter;
+          resultReadingEl.textContent = randomCard.reading;
+          showPopup();
+        }, 2000);
+      }
 
-        function randomLetter() {
-            const cards = document.querySelectorAll('.card');
-            const sound = document.getElementById("randomSound");
-            if (soundEnabled) sound.play();
-            let spinTime = 2000;
-            let interval = setInterval(() => {
-                cards.forEach(card => {
-                    card.style.left = `${Math.random() * 80 + 10}%`;
-                    card.style.top = `${Math.random() * 60 + 20}%`;
-                });
-            }, 100);
-            
-            setTimeout(() => {
-                clearInterval(interval);
-                const index = Math.floor(Math.random() * letters.length);
-                const selectedLetter = letters.splice(index, 1)[0];
-                showPopup(selectedLetter);
-            }, spinTime);
+      // แสดง Popup พร้อมผลลัพธ์และใช้ ResponsiveVoice อ่านคำอ่าน (ซ่อนไว้)
+      function showPopup() {
+        popupEl.style.display = 'flex';
+        if (!isMuted && typeof responsiveVoice !== "undefined" && responsiveVoice.voiceSupport()) {
+          responsiveVoice.speak(resultReadingEl.textContent, "Thai Female", { rate: 1 });
         }
+      }
 
-        function showPopup(letter) {
-            const popup = document.createElement('div');
-            popup.className = 'popup';
-            popup.innerHTML = `<div class='popup-content'><span class='close-btn' onclick='this.parentElement.parentElement.remove()'>&times;</span>${letter}</div>`;
-            document.body.appendChild(popup);
-            if (soundEnabled) {
-                responsiveVoice.speak(letter, "Thai Female");
-            }
+      // ซ่อน Popup
+      function hidePopup() {
+        popupEl.style.display = 'none';
+      }
+
+      // กำหนดเหตุการณ์ให้กับปุ่ม "สุ่มการ์ด"
+      document.getElementById('manual-btn').addEventListener('click', function() {
+        responsiveVoice.cancel();
+        hidePopup();
+        startRandomization();
+      });
+
+      // กำหนดเหตุการณ์ให้กับปุ่ม "ปิด" ใน Popup
+      document.getElementById('close-btn').addEventListener('click', function() {
+        responsiveVoice.cancel();
+        hidePopup();
+      });
+
+      // กำหนดเหตุการณ์ให้กับปุ่ม "ปิดเสียง" พร้อมไอคอน
+      muteBtn.addEventListener('click', function() {
+        isMuted = !isMuted;
+        if (isMuted) {
+          muteBtn.innerHTML = 'เปิดเสียง <span id="mute-icon">🔇</span>';
+          if (typeof responsiveVoice !== "undefined") {
+            responsiveVoice.cancel();
+          }
+        } else {
+          muteBtn.innerHTML = 'ปิดเสียง <span id="mute-icon">🔊</span>';
         }
-        
-        createCards();
-    </script>
+      });
+
+      // เริ่มสุ่มการ์ดครั้งแรกเมื่อโหลดหน้าเว็บ
+      startRandomization();
+    });
+  </script>
 </body>
 </html>
